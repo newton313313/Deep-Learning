@@ -1,0 +1,105 @@
+### a toy model
+import numpy as np
+#import tensorflow as tf
+#import sys
+#sys.path.pardir
+#print(help(np.sum))
+### functions
+
+def logi(x):
+    return 1/(1 + np.exp(-x))
+##
+def _numerical_gradient_no_batch(f, x):
+    h = 1e-4  # 0.0001
+    grad = np.zeros_like(x)
+    
+    for idx in range(x.size):
+        tmp_val = x[idx]
+        x[idx] = float(tmp_val) + h
+        fxh1 = f(x)  # f(x+h)
+        
+        x[idx] = tmp_val - h 
+        fxh2 = f(x)  # f(x-h)
+        grad[idx] = (fxh1 - fxh2) / (2*h)
+        
+        x[idx] = tmp_val  # 値を元に戻す
+        
+    return grad
+def numerical_gradient(f, X):
+    if X.ndim == 1:
+        return _numerical_gradient_no_batch(f, X)
+    else:
+        grad = np.zeros_like(X)
+        
+        for idx, x in enumerate(X):
+            grad[idx] = _numerical_gradient_no_batch(f, x)
+        
+        return grad
+
+def gradient_descent(f, init_x, lr=0.01, step_num=100):
+    x = init_x
+    x_history = []
+
+    for i in range(step_num):
+        x_history.append( x.copy() )
+        grad = numerical_gradient(f, x)
+        x -= lr * grad
+    return x, np.array(x_history)
+
+###data
+a1 = [1,2,3,4]#star,0
+a2 = [1,2,3,5]
+b1 = [2,4,6,8]#galaxy,1
+b2 = [2,4,6,7]
+weight = np.random.randn(4,4)
+#print(weight)
+vec = np.random.randn(4)
+#print("wa1",wa1)
+c3 = np.zeros(4)#for loss
+c4 = np.zeros(4)
+inp = [1,2,3,1]#star_input
+winp = logi(np.dot(weight,inp) + vec)
+###class    
+###
+def summation(a):
+    return np.sum(a,axis=0)
+def loss_c3(x):
+    wa1 = logi(np.dot(x,a1) + vec)
+    for i in range(4):
+        c3[i] = (winp[i] - wa1[i])**2
+    return loss(c3)
+def loss_c4(x):
+    wa2 = logi(np.dot(x,a2) + vec)
+    for j in range(4):
+        c4[j] = (winp[j] - wa2[j])**2
+    return loss(c4)
+def loss2(a1,a2,b1,b2):
+    b = 0
+    for i in range(4):
+        b = b - (a1[i]-a2[i])**2 - (b1[i]-b2[i])**2 + (b1[i]-a2[i])**2 + (a1[i]-b2[i])**2
+    return b
+
+###
+print("loss_c3",loss_c3(winp))
+print("loss_c4",loss_c4(winp))
+### gradient
+def func3(x):
+    return np.sum(x**2,axis=0)
+def func4(weigh):
+    logi(np.dot(weigh,inp) + vec)
+def loss3(weigh):
+    aa1 = logi(np.dot(weigh,a1) + vec)
+    aa2 = logi(np.dot(weigh,a2) + vec)
+    bb1 = logi(np.dot(weigh,b1) + vec)
+    bb2 = logi(np.dot(weigh,b2) + vec)
+    return loss2(aa1,aa2,bb1,bb2)
+lr = 0.05
+step_num = 100
+init_y = np.array([1.0,2.0,3.0,4.0])
+init_z = weight 
+#y, y_history = gradient_descent(func3, init_y, lr=lr, step_num=step_num)
+#print(y)
+z1, z1_history = gradient_descent(loss3, init_z, lr=lr, step_num=step_num)
+#z2, z2_history = gradient_descent(loss_c4, init_z, lr=lr, step_num=step_num)
+print(z1)
+#print(z2)
