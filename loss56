@@ -1,0 +1,49 @@
+# -*- coding: utf-8 -*-
+"""##licenced.not written by me
+Created on Mon May  6 02:45:39 2019
+
+@author: Shuey
+"""
+import tensorflow as tf
+import numpy as np
+# Make up some testing data, need to be rank 2
+
+x = np.array([
+		[0.,2.,1.],
+		[0.,0.,2.]
+		])
+label = np.array([
+		[0.,0.,1.],
+		[0.,0.,1.]
+		])
+
+
+# Numpy part #
+
+def softmax(logits):
+    sf = np.exp(logits)
+    sf = sf/np.sum(sf, axis=1).reshape(-1,1)
+    return sf
+
+def cross_entropy(softmax, labels):
+	return -np.sum( labels * np.log(softmax), axis=1 )
+
+def loss(cross_entropy):
+	return np.mean( cross_entropy )
+
+numpy_result = loss(cross_entropy( softmax(x), label ))
+
+print(numpy_result)
+
+# Tensorflow part #
+
+g = tf.Graph()
+with g.as_default():
+	tf_x = tf.constant(x)
+	tf_label = tf.constant(label)
+	tf_ret = tf.reduce_mean( tf.nn.softmax_cross_entropy_with_logits(tf_x,tf_label) )
+
+with tf.Session(graph=g) as ss:
+	tensorflow_result = ss.run([tf_ret])
+
+print(tensorflow_result)
